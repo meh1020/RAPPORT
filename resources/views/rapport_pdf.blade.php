@@ -464,7 +464,7 @@
     </div>
 
     <!-- SECTION 6 : Répartition des navires par Flag -->
-    @if(isset($flagChartUrl) && isset($flagData)
+    @if(isset($flagChartUrl) && isset($flagData))
     <div class="chart-section">
         <h2>Répartition des navires par Flag</h2>
         <div class="chart-image">

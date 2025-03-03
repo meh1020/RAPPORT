@@ -162,6 +162,23 @@
             </div>
         </div>
     </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5>Répartition des types de navires</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="chartShipTypes" width="400" height="300"></canvas>
+                <button class="btn btn-secondary mt-2" onclick="downloadChart('chartShipTypes', 'ship_types_distribution.png')">
+                    Télécharger
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    
+</div>
     
 </div>
 
@@ -297,6 +314,29 @@
             maintainAspectRatio: true,
             plugins: {
                 legend: { position: 'top' }
+            }
+        }
+    });
+    //chart ZEE
+    const shipTypeLabels = @json($shipTypesData->pluck('name'));
+    const shipTypeCounts = @json($shipTypesData->pluck('count'));
+
+    new Chart(document.getElementById('chartShipTypes').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: shipTypeLabels,
+            datasets: [{
+                label: 'Nombre de navires',
+                backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#F44336', '#9C27B0', '#795548'],
+                data: shipTypeCounts
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
             }
         }
     });

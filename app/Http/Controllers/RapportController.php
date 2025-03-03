@@ -168,6 +168,30 @@ class RapportController extends Controller
                 ];
             });
 
+            $shipTypesQuery = Article::query();
+
+            // Appliquer le filtre sur "time_of_fix"
+            if ($dateFilter) {
+                $shipTypesQuery->whereDate('time_of_fix', $dateFilter);
+            } elseif ($yearQuarter && $quarter && isset($start, $end)) {
+                $shipTypesQuery->whereBetween('time_of_fix', [$start, $end]);
+            } elseif ($yearMonth && $month) {
+                $shipTypesQuery->whereYear('time_of_fix', $yearMonth)
+                               ->whereMonth('time_of_fix', $month);
+            }
+            
+            $shipTypesData = $shipTypesQuery
+                ->selectRaw('ship_type, COUNT(*) as count')
+                ->groupBy('ship_type')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'name'  => $item->ship_type,
+                        'count' => $item->count,
+                    ];
+                });
+            
+
         // Construction du texte récapitulatif du filtre
         if ($dateFilter) {
             $filterResult = "Données du " . $dateFilter;
@@ -196,6 +220,7 @@ class RapportController extends Controller
             'typesData',
             'causesData',
             'regionsData',
+            'shipTypesData',
             'bilanStats',
             'zoneCounts',
             'flagData',
@@ -575,6 +600,7 @@ class RapportController extends Controller
                 'bilans'          => $bilanSarQuery->get(),
                 'avurnavs'        => $avurnavs,
                 'pollutions'      => $pollutions,
+                'shipTypesData' => $shipTypesData,
             ];
         });
     

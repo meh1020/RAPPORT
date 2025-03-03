@@ -91,10 +91,21 @@ class DashboardController extends Controller
          ];
      });
 
+    $shipTypesData = Article::selectRaw('ship_type, COUNT(*) as count')
+                         ->groupBy('ship_type')
+                         ->get()
+                         ->map(function ($item) {
+                            return [
+                                'name' => $item->ship_type,
+                                'count' => $item->count
+                            ];
+                        });
+
     return view('dashboard', compact(
         'articleCount', 'avurnavCount', 'pollutionCount', 'sitrepCount', 'bilanSarCount', 
-        'typesData', 'causesData', 'regionsData', 'bilanStats', 'zoneCounts', 'flagData'
+        'typesData', 'causesData', 'regionsData', 'bilanStats', 'zoneCounts', 'flagData','shipTypesData'
     ));
     }
+
     
 }
