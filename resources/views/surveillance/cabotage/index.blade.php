@@ -45,12 +45,12 @@
                         <td><small>{{ $cabotage->passagers }}</small></td>
                         <td>
                             <div class="d-flex gap-2">
-                                <a href="{{ route('cabotage.edit', $cabotage->id) }}" class="btn btn-secondary btn-sm">Modifier</a>
                                 <form action="{{ route('cabotage.destroy', $cabotage->id) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer cet élément ?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm">
                                         <i class="fas fa-trash-alt"></i>
+                                        Supprimer
                                     </button>
                                 </form>
                             </div>

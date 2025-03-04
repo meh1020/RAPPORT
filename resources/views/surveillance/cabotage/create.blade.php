@@ -6,13 +6,13 @@
 <div class="container-fluid px-4">
     <div class="top-menu">
         <button class="btn btn-success">
-            <a class="text-decoration-none text-white" href="{{ route('cabotage.create') }}">Créer AVURNAV</a>
+            <a class="text-decoration-none text-white" href="{{ route('cabotage.create') }}">Créer Cabotage</a>
         </button>
         <button class="btn btn-secondary">
-            <a class="text-decoration-none text-white" href="{{ route('cabotage.index') }}">Liste AVURNAV</a>
+            <a class="text-decoration-none text-white" href="{{ route('cabotage.index') }}">Liste Cabotage</a>
         </button>
     </div>
-    <h2 class="mb-4 text-center">📜 Créer un donné AVURNAV</h2>
+    <h2 class="mb-4 text-center">📜 Créer un donné Cabotage</h2>
 
     @if ($errors->any())
         <div class="alert alert-danger">

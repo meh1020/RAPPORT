@@ -16,6 +16,7 @@ use App\Http\Controllers\CauseEvenementController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\test;
+use App\Http\Controllers\MerTerritorial;
 
 // WELCOME
 Route::get('/', function () {
@@ -94,7 +95,16 @@ Route::get('/rapport/pdf', [RapportController::class, 'exportPdf'])->name('rappo
 
 //CABOTAGE
 use App\Http\Controllers\CabotageController;
-
 Route::resource('cabotage', CabotageController::class);
 Route::post('/cabotage/store', [CabotageController::class, 'store'])->name('cabotage.store');
+
+//mer territorial
+Route::resource('mer_territorial', MerTerritorial::class);
+Route::post('/import-mer_territorial', [MerTerritorial::class, 'importCSV'])->name('mer_territorial.import');
+
+//vedette sar
+use App\Http\Controllers\VedetteSar;
+Route::resource('vedette_sar', VedetteSar::class);
+Route::post('/vedette_sar/store', [VedetteSar::class, 'store'])->name('vedette_sar.store');
+
 
