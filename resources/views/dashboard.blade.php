@@ -140,19 +140,34 @@
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-secondary text-white">
-                <h5>Répartition des types de navires</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="chartShipTypes" width="400" height="300"></canvas>
-                <button class="btn btn-secondary mt-2" onclick="downloadChart('chartShipTypes', 'ship_types_distribution.png')">
-                    Télécharger
-                </button>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Répartition des types de navires</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartShipTypes" width="400" height="300"></canvas>
+                    <button class="btn btn-secondary mt-2" onclick="downloadChart('chartShipTypes', 'ship_types_distribution.png')">
+                        Télécharger
+                    </button>
+                </div>
+            </div>    
+        </div>
+    
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Graphique Cabotage</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="cabotageChart" width="400" height="300"></canvas>
+                    <button class="btn btn-secondary mt-2" onclick="downloadChart('cabotageChart', 'cabotage_graph.png')">
+                        Télécharger
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
     
     
 </div>
@@ -245,7 +260,7 @@
     const flagCounts = @json($flagData->pluck('count'));
 
     new Chart(document.getElementById('chartFlags').getContext('2d'), {
-        type: 'pie',
+        type: 'bar',
         data: {
             labels: flagLabels,
             datasets: [{
@@ -275,6 +290,61 @@
         options: {
             responsive: true,
             plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    // Récupération des données passées depuis le contrôleur
+    const cabotageData = @json($cabotageData);
+
+    // Création des tableaux pour les labels et les valeurs
+    const labels = cabotageData.map(item => item.provenance);
+    const naviresData = cabotageData.map(item => item.total_navires);
+    const equipageData = cabotageData.map(item => item.total_equipage);
+    const passagersData = cabotageData.map(item => item.total_passagers);
+
+    const ctx = document.getElementById('cabotageChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Navires',
+                    backgroundColor: '#4CAF50',
+                    data: naviresData
+                },
+                {
+                    label: 'Equipage',
+                    backgroundColor: '#FF9800',
+                    data: equipageData
+                },
+                {
+                    label: 'Passagers',
+                    backgroundColor: '#2196F3',
+                    data: passagersData
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Nombre'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                },
                 legend: {
                     position: 'top',
                 }

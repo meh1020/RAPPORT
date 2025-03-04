@@ -168,28 +168,54 @@ class RapportController extends Controller
                 ];
             });
 
-            $shipTypesQuery = Article::query();
+        $shipTypesQuery = Article::query();
 
-            // Appliquer le filtre sur "time_of_fix"
-            if ($dateFilter) {
-                $shipTypesQuery->whereDate('time_of_fix', $dateFilter);
-            } elseif ($yearQuarter && $quarter && isset($start, $end)) {
-                $shipTypesQuery->whereBetween('time_of_fix', [$start, $end]);
-            } elseif ($yearMonth && $month) {
-                $shipTypesQuery->whereYear('time_of_fix', $yearMonth)
-                               ->whereMonth('time_of_fix', $month);
-            }
+        // Appliquer le filtre sur "time_of_fix"
+        if ($dateFilter) {
+            $shipTypesQuery->whereDate('time_of_fix', $dateFilter);
+        } elseif ($yearQuarter && $quarter && isset($start, $end)) {
+            $shipTypesQuery->whereBetween('time_of_fix', [$start, $end]);
+        } elseif ($yearMonth && $month) {
+            $shipTypesQuery->whereYear('time_of_fix', $yearMonth)
+                            ->whereMonth('time_of_fix', $month);
+        }
             
-            $shipTypesData = $shipTypesQuery
-                ->selectRaw('ship_type, COUNT(*) as count')
-                ->groupBy('ship_type')
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'name'  => $item->ship_type,
-                        'count' => $item->count,
-                    ];
-                });
+        $shipTypesData = $shipTypesQuery
+            ->selectRaw('ship_type, COUNT(*) as count')
+            ->groupBy('ship_type')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name'  => $item->ship_type,
+                    'count' => $item->count,
+                ];
+            });
+
+            //  AJOUT : Filtrage Cabotage
+        // --------------------------------------------
+        $cabotageQuery = \App\Models\Cabotage::query();
+
+        // Filtrage par date (jour, trimestre, mois) sur created_at (ou 'date' si vous avez un champ 'date')
+        if ($dateFilter) {
+            $cabotageQuery->whereDate('created_at', $dateFilter);
+        } elseif (isset($start, $end)) {
+            $cabotageQuery->whereBetween('created_at', [$start, $end]);
+        } elseif ($yearMonth && $month) {
+            $cabotageQuery->whereYear('created_at', $yearMonth)
+                        ->whereMonth('created_at', $month);
+        }
+
+        // Pour chaque provenance, on compte le nombre de navires distincts et on somme équipage & passagers
+        $cabotageData = $cabotageQuery
+            ->selectRaw('
+                provenance,
+                COUNT(DISTINCT navires) as total_navires,
+                SUM(equipage) as total_equipage,
+                SUM(passagers) as total_passagers
+            ')
+            ->groupBy('provenance')
+            ->get();
+
             
 
         // Construction du texte récapitulatif du filtre
@@ -224,7 +250,8 @@ class RapportController extends Controller
             'bilanStats',
             'zoneCounts',
             'flagData',
-            'filterResult'
+            'filterResult',
+            'cabotageData'
         ));
     }
 
@@ -233,14 +260,7 @@ class RapportController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $options = [
-            "ssl" => [
-                "verify_peer" => false,
-                "verify_peer_name" => false,
-            ],
-        ];
-        $context = stream_context_create($options);
-        // Pour laisser plus de temps si besoin (optionnel)
+        // Augmenter le temps d'exécution et la mémoire si nécessaire
         ini_set('max_execution_time', 300);
         ini_set('memory_limit', '512M');
     
@@ -252,6 +272,8 @@ class RapportController extends Controller
         $month        = $request->input('filter_month');
     
         // Détermination de la plage de dates pour le trimestre
+        $start = null;
+        $end = null;
         if ($yearQuarter && $quarter) {
             switch ($quarter) {
                 case 1:
@@ -289,16 +311,16 @@ class RapportController extends Controller
         // Construction d'une clé de cache basée sur l'URL complète des filtres
         $cacheKey = 'rapport_pdf_data_' . md5($request->fullUrl());
     
-        // Mettre en cache les données pour 10 minutes
-        $data = Cache::remember($cacheKey, now()->addMinutes(10), function() use ($bilanSarQuery, $request, $dateFilter, $yearQuarter, $quarter, $yearMonth, $month, $start, $end,$context) {
+        // Mettre en cache les données pendant 10 minutes
+        $data = Cache::remember($cacheKey, now()->addMinutes(10), function() use ($bilanSarQuery, $request, $dateFilter, $yearQuarter, $quarter, $yearMonth, $month, $start, $end) {
     
-            // Définir une palette de couleurs
+            // Palette de couleurs commune aux graphiques
             $colorsPalette = [
                 '#4CAF50', '#2196F3', '#FF9800', '#F44336', '#9C27B0',
                 '#795548', '#E91E63', '#00BCD4', '#FFEB3B', '#009688'
             ];
     
-            // 1. Types d'événements
+            // 1. Graphique : Types d'événements
             $typesData = (clone $bilanSarQuery)
                 ->selectRaw('type_d_evenement_id, COUNT(*) as count')
                 ->groupBy('type_d_evenement_id')
@@ -314,33 +336,27 @@ class RapportController extends Controller
             $typesCounts = $typesData->pluck('count')->toArray();
             $nbBars = count($typesCounts);
             $colorsUsed = array_slice($colorsPalette, 0, $nbBars);
-    
             $typesChartConfig = [
                 'type' => 'bar',
                 'data' => [
-                    'labels' => $typesLabels,
+                    'labels'   => $typesLabels,
                     'datasets' => [[
-                        'data'  => $typesCounts,
+                        'data'            => $typesCounts,
                         'backgroundColor' => $colorsUsed,
                     ]]
                 ],
                 'options' => [
                     'scales' => [
                         'y' => [
-                            'type' => 'linear',
-                            'min' => 0,
-                            'ticks' => [
-                                'beginAtZero' => true
-                            ]
+                            'type'       => 'linear',
+                            'min'        => 0,
+                            'ticks'      => ['beginAtZero' => true]
                         ]
                     ]
                 ]
             ];
-            $typesChartUrl = 'https://quickchart.io/chart?width=500&height=200&version=3&c=' . urlencode(json_encode($typesChartConfig));
-            $typesChartImage = file_get_contents($typesChartUrl, false, $context);
-            $typesChartBase64 = 'data:image/png;base64,' . base64_encode($typesChartImage);
-            
-            // 2. Causes d'événements
+    
+            // 2. Graphique : Causes d'événements
             $causesData = (clone $bilanSarQuery)
                 ->selectRaw('cause_de_l_evenement_id, COUNT(*) as count')
                 ->groupBy('cause_de_l_evenement_id')
@@ -359,10 +375,10 @@ class RapportController extends Controller
             $causesChartConfig = [
                 'type' => 'bar',
                 'data' => [
-                    'labels' => $causesLabels,
+                    'labels'   => $causesLabels,
                     'datasets' => [[
-                        'label' => "Nombre d'événements (Causes)",
-                        'data'  => $causesCounts,
+                        'label'           => "Nombre d'événements (Causes)",
+                        'data'            => $causesCounts,
                         'backgroundColor' => $colorsUsed,
                     ]]
                 ],
@@ -370,20 +386,15 @@ class RapportController extends Controller
                     'responsive' => true,
                     'scales' => [
                         'y' => [
-                            'type' => 'linear',
-                            'min' => 0,
-                            'ticks' => [
-                                'beginAtZero' => true,
-                                'stepSize' => 1
-                            ]
+                            'type'       => 'linear',
+                            'min'        => 0,
+                            'ticks'      => ['beginAtZero' => true, 'stepSize' => 1]
                         ]
                     ]
                 ]
             ];
-            $causesChartUrl = 'https://quickchart.io/chart?width=500&height=200&version=3&c=' . urlencode(json_encode($causesChartConfig));
-            $causesChartImage = file_get_contents($causesChartUrl, false, $context);
-            $causesChartBase64 = 'data:image/png;base64,' . base64_encode($causesChartImage);
-            // 3. Répartition par Région
+    
+            // 3. Graphique : Répartition par Région
             $regionsData = (clone $bilanSarQuery)
                 ->selectRaw('region_id, COUNT(*) as count')
                 ->groupBy('region_id')
@@ -402,10 +413,10 @@ class RapportController extends Controller
             $regionsChartConfig = [
                 'type' => 'bar',
                 'data' => [
-                    'labels' => $regionsLabels,
+                    'labels'   => $regionsLabels,
                     'datasets' => [[
-                        'label' => "Nombre de bilans SAR (Régions)",
-                        'data'  => $regionsCounts,
+                        'label'           => "Nombre de bilans SAR (Régions)",
+                        'data'            => $regionsCounts,
                         'backgroundColor' => $colorsUsed,
                     ]]
                 ],
@@ -413,15 +424,13 @@ class RapportController extends Controller
                     'scales' => [
                         'y' => [
                             'beginAtZero' => true,
-                            'min' => 0
+                            'min'         => 0
                         ]
                     ]
                 ]
             ];
-            $regionsChartUrl = 'https://quickchart.io/chart?width=500&height=200&version=3&c=' . urlencode(json_encode($regionsChartConfig));
-            $regionsChartImage = file_get_contents($regionsChartUrl, false, $context);
-            $regionsChartBase64 = 'data:image/png;base64,' . base64_encode($regionsChartImage);
-            // 4. Statistiques des Bilans SAR
+    
+            // 4. Graphique : Statistiques des Bilans SAR
             $bilanStats = (clone $bilanSarQuery)
                 ->selectRaw('
                     SUM(pob) as pob_total, 
@@ -444,10 +453,10 @@ class RapportController extends Controller
             $bilanChartConfig = [
                 'type' => 'bar',
                 'data' => [
-                    'labels' => $bilanLabels,
+                    'labels'   => $bilanLabels,
                     'datasets' => [[
-                        'label' => 'Statistiques des Bilans SAR',
-                        'data'  => $bilanCounts,
+                        'label'           => 'Statistiques des Bilans SAR',
+                        'data'            => $bilanCounts,
                         'backgroundColor' => ['#4CAF50', '#2196F3', '#FF9800', '#F44336', '#9C27B0', '#795548']
                     ]]
                 ],
@@ -455,15 +464,13 @@ class RapportController extends Controller
                     'scales' => [
                         'y' => [
                             'beginAtZero' => true,
-                            'min' => 0
+                            'min'         => 0
                         ]
                     ]
                 ]
             ];
-            $bilanChartUrl = 'https://quickchart.io/chart?width=450&height=200&version=3&c=' . urlencode(json_encode($bilanChartConfig));
-            $bilanChartImage = file_get_contents($bilanChartUrl, false, $context);
-            $bilanChartBase64 = 'data:image/png;base64,' . base64_encode($bilanChartImage);
-            // 5. Nombre d'entrées par Zone
+    
+            // 5. Graphique : Nombre d'entrées par Zone
             $zoneCounts = [];
             for ($i = 1; $i <= 9; $i++) {
                 $modelClass = "App\\Models\\zone_$i";
@@ -485,10 +492,10 @@ class RapportController extends Controller
             $zoneChartConfig = [
                 'type' => 'bar',
                 'data' => [
-                    'labels' => $zoneLabels,
+                    'labels'   => $zoneLabels,
                     'datasets' => [[
-                        'label' => "Nombre d'entrées par zone",
-                        'data'  => $zoneValues,
+                        'label'           => "Nombre d'entrées par zone",
+                        'data'            => $zoneValues,
                         'backgroundColor' => '#17a2b8'
                     ]]
                 ],
@@ -496,15 +503,13 @@ class RapportController extends Controller
                     'scales' => [
                         'y' => [
                             'beginAtZero' => true,
-                            'min' => 0
+                            'min'         => 0
                         ]
                     ]
                 ]
             ];
-            $zoneChartUrl = 'https://quickchart.io/chart?width=450&height=200&version=3&c=' . urlencode(json_encode($zoneChartConfig));
-            $zoneChartImage = file_get_contents($zoneChartUrl, false, $context);
-            $zoneChartBase64 = 'data:image/png;base64,' . base64_encode($zoneChartImage);
-            // 6. Flags (navires de pêche)
+    
+            // 6. Graphique : Flags (navires de pêche)
             $flagQuery = Peche::query();
             if ($dateFilter) {
                 $flagQuery->whereDate('time_of_fix', $dateFilter);
@@ -527,23 +532,104 @@ class RapportController extends Controller
             $flagLabels = $flagData->pluck('name')->toArray();
             $flagCounts = $flagData->pluck('count')->toArray();
             $flagChartConfig = [
-                'type' => 'doughnut',
+                'type' => 'bar',
                 'data' => [
-                    'labels' => $flagLabels,
+                    'labels'   => $flagLabels,
                     'datasets' => [[
-                        'label' => 'Nombre de navires',
-                        'data'  => $flagCounts,
+                        'label'           => 'Nombre de navires',
+                        'data'            => $flagCounts,
                         'backgroundColor' => ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33A8'],
                     ]]
                 ]
             ];
-            $flagChartUrl = 'https://quickchart.io/chart?width=450&height=200&version=3&c=' . urlencode(json_encode($flagChartConfig));
-            $flagChartImage = file_get_contents($flagChartUrl, false, $context);
-            $flagChartBase64 = 'data:image/png;base64,' . base64_encode($flagChartImage);
-            // Application des mêmes filtres aux modèles Avurnav et Pollution
+    
+            // 7. Graphique : ZEE RECAP – Ship Types
+            $shipTypesQuery = Article::query();
+            if ($dateFilter) {
+                $shipTypesQuery->whereDate('time_of_fix', $dateFilter);
+            } elseif ($yearQuarter && $quarter && isset($start, $end)) {
+                $shipTypesQuery->whereBetween('time_of_fix', [$start, $end]);
+            } elseif ($yearMonth && $month) {
+                $shipTypesQuery->whereYear('time_of_fix', $yearMonth)
+                               ->whereMonth('time_of_fix', $month);
+            }
+            $shipTypesData = $shipTypesQuery
+                ->selectRaw('ship_type, COUNT(*) as count')
+                ->groupBy('ship_type')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'name'  => $item->ship_type,
+                        'count' => $item->count,
+                    ];
+                });
+            $shipTypesLabels = $shipTypesData->pluck('name')->toArray();
+            $shipTypesCounts = $shipTypesData->pluck('count')->toArray();
+            $topShipTypes = $shipTypesData->sortByDesc('count')->values()->take(3)->toArray();
+            $topShipTypesFlags = [];
+            foreach ($topShipTypes as $shipTypeItem) {
+                $flagRecord = \App\Models\Article::where('ship_type', $shipTypeItem['name'])
+                    ->selectRaw('flag, COUNT(*) as count')
+                    ->groupBy('flag')
+                    ->orderByDesc('count')
+                    ->first();
+                $topShipTypesFlags[] = $flagRecord ? $flagRecord->flag : 'Inconnu';
+            }
+            $shipTypesChartConfig = [
+                'type' => 'bar',
+                'data' => [
+                    'labels'   => $shipTypesLabels,
+                    'datasets' => [[
+                        'label'           => 'Nombre de navires par Ship Type',
+                        'data'            => $shipTypesCounts,
+                        'backgroundColor' => ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33A8'],
+                    ]]
+                ],
+                'options' => [
+                    'scales' => [
+                        'y' => [
+                            'beginAtZero' => true,
+                            'min'         => 0
+                        ]
+                    ]
+                ]
+            ];
+    
+            // Construction des URLs pour chaque graphique
+            $typesChartUrl     = 'https://quickchart.io/chart?width=500&height=200&version=3&c=' . urlencode(json_encode($typesChartConfig));
+            $causesChartUrl    = 'https://quickchart.io/chart?width=500&height=200&version=3&c=' . urlencode(json_encode($causesChartConfig));
+            $regionsChartUrl   = 'https://quickchart.io/chart?width=500&height=200&version=3&c=' . urlencode(json_encode($regionsChartConfig));
+            $bilanChartUrl     = 'https://quickchart.io/chart?width=450&height=200&version=3&c=' . urlencode(json_encode($bilanChartConfig));
+            $zoneChartUrl      = 'https://quickchart.io/chart?width=450&height=200&version=3&c=' . urlencode(json_encode($zoneChartConfig));
+            $flagChartUrl      = 'https://quickchart.io/chart?width=450&height=200&version=3&c=' . urlencode(json_encode($flagChartConfig));
+            $shipTypesChartUrl = 'https://quickchart.io/chart?width=500&height=300&version=3&c=' . urlencode(json_encode($shipTypesChartConfig));
+    
+            // Appels HTTP asynchrones pour récupérer les images de graphiques
+            $client = new \GuzzleHttp\Client(['verify' => false]);
+            $promises = [
+                'typesChartImage'     => $client->getAsync($typesChartUrl),
+                'causesChartImage'    => $client->getAsync($causesChartUrl),
+                'regionsChartImage'   => $client->getAsync($regionsChartUrl),
+                'bilanChartImage'     => $client->getAsync($bilanChartUrl),
+                'zoneChartImage'      => $client->getAsync($zoneChartUrl),
+                'flagChartImage'      => $client->getAsync($flagChartUrl),
+                'shipTypesChartImage' => $client->getAsync($shipTypesChartUrl),
+            ];
+            // Utilisation de Utils::unwrap() pour résoudre les promesses
+            $results = \GuzzleHttp\Promise\Utils::unwrap($promises);
+    
+            // Conversion des images en base64
+            $typesChartBase64     = 'data:image/png;base64,' . base64_encode($results['typesChartImage']->getBody()->getContents());
+            $causesChartBase64    = 'data:image/png;base64,' . base64_encode($results['causesChartImage']->getBody()->getContents());
+            $regionsChartBase64   = 'data:image/png;base64,' . base64_encode($results['regionsChartImage']->getBody()->getContents());
+            $bilanChartBase64     = 'data:image/png;base64,' . base64_encode($results['bilanChartImage']->getBody()->getContents());
+            $zoneChartBase64      = 'data:image/png;base64,' . base64_encode($results['zoneChartImage']->getBody()->getContents());
+            $flagChartBase64      = 'data:image/png;base64,' . base64_encode($results['flagChartImage']->getBody()->getContents());
+            $shipTypesChartBase64 = 'data:image/png;base64,' . base64_encode($results['shipTypesChartImage']->getBody()->getContents());
+    
+            // Récupération des données pour Avurnav et Pollution
             $avurnavQuery = \App\Models\Avurnav::query();
             $pollutionQuery = \App\Models\Pollution::query();
-    
             if ($dateFilter) {
                 $avurnavQuery->whereDate('created_at', $dateFilter);
                 $pollutionQuery->whereDate('created_at', $dateFilter);
@@ -578,42 +664,45 @@ class RapportController extends Controller
             }
     
             return [
-                'filterResult'    => $filterResult,
-                'typesData'       => $typesData,
-                'typesChartUrl'   => $typesChartUrl,
-                'causesData'      => $causesData,
-                'causesChartUrl'  => $causesChartUrl,
-                'regionsData'     => $regionsData,
-                'regionsChartUrl' => $regionsChartUrl,
-                'bilanStats'      => $bilanStats,
-                'bilanChartUrl'   => $bilanChartUrl,
-                'zoneCounts'      => $zoneCounts,
-                'zoneChartUrl'    => $zoneChartUrl,
-                'flagData'        => $flagData,
-                'flagChartUrl'    => $flagChartUrl,
-                'typesChartBase64'=> $typesChartBase64,
-                'causesChartBase64'=> $causesChartBase64,
-                'regionsChartBase64'=> $regionsChartBase64,
-                'bilanChartBase64'=> $bilanChartBase64,
-                'zoneChartBase64'=> $zoneChartBase64,
-                'flagChartBase64'=> $flagChartBase64,
-                'bilans'          => $bilanSarQuery->get(),
-                'avurnavs'        => $avurnavs,
-                'pollutions'      => $pollutions,
-                'shipTypesData' => $shipTypesData,
+                'filterResult'         => $filterResult,
+                'typesData'            => $typesData,
+                'typesChartUrl'        => $typesChartUrl,
+                'causesData'           => $causesData,
+                'causesChartUrl'       => $causesChartUrl,
+                'regionsData'          => $regionsData,
+                'regionsChartUrl'      => $regionsChartUrl,
+                'bilanStats'           => $bilanStats,
+                'bilanChartUrl'        => $bilanChartUrl,
+                'zoneCounts'           => $zoneCounts,
+                'zoneChartUrl'         => $zoneChartUrl,
+                'flagData'             => $flagData,
+                'flagChartUrl'         => $flagChartUrl,
+                'typesChartBase64'     => $typesChartBase64,
+                'causesChartBase64'    => $causesChartBase64,
+                'regionsChartBase64'   => $regionsChartBase64,
+                'bilanChartBase64'     => $bilanChartBase64,
+                'zoneChartBase64'      => $zoneChartBase64,
+                'flagChartBase64'      => $flagChartBase64,
+                'bilans'               => $bilanSarQuery->get(),
+                'avurnavs'             => $avurnavs,
+                'pollutions'           => $pollutions,
+                'shipTypesData'        => $shipTypesData,
+                'shipTypesChartBase64' => $shipTypesChartBase64,
+                'topShipTypes'         => $topShipTypes,
+                'topShipTypesFlags'    => $topShipTypesFlags,
+                'cabotageData'         => $cabotageData
             ];
         });
     
         // Génération du PDF en activant les images distantes
         $pdf = PDF::loadView('rapport_pdf', $data)
-        ->setOptions([
-            'isRemoteEnabled' => true,
-            'isHtml5ParserEnabled' => true,
-        ]);
-
+            ->setOptions([
+                'isRemoteEnabled'      => true,
+                'isHtml5ParserEnabled' => true,
+            ]);
     
         return $pdf->download('rapport_' . $data['filterResult'] . '.pdf');
     }
     
-     // return view('rapport_pdf',compact('filterResult','bilans' , 'typesChartUrl','causesChartUrl', 'causesData', 'typesData', 'regionsChartUrl', 'regionsData', 'bilanStats', 'bilanChartUrl', 'zoneChartUrl', 'zoneCounts','flagChartUrl','flagData' ));
-}
+
+}  

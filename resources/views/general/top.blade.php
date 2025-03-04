@@ -25,7 +25,7 @@
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="{{ route('articles.index') }}" class="nav-link {{ request()->is('articles') ? 'activo' : '' }}">Liste des données</a>
+        <a href="{{ route('articles.index') }}" class="nav-link {{ request()->is('articles') ? 'activo' : '' }}">ZEE</a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
         <a href="{{ route('zone.show1') }}" class="nav-link {{ request()->is('zone*') ? 'activo' : '' }}">Zones</a>
@@ -172,6 +172,16 @@
             </ul>
             </li>
             <li class="nav-item">
+              <a href="{{ url('/cabotage') }}" class="nav-link {{ request()->is('cabotage*') ? 'activee' : '' }}">
+                <i class="fas fa-anchor nav-icon"></i> 
+
+
+                <p>
+                    CABOTAGE 
+                </p>
+              </a>
+          </li>
+            <li class="nav-item">
                 <a href="{{ url('/rapports') }}" class="nav-link {{ request()->is('rapport*') ? 'activee' : '' }}">
                   <i class="fas fa-chart-bar nav-icon"></i> 
 
@@ -181,6 +191,7 @@
                   </p>
                 </a>
             </li>
+            
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

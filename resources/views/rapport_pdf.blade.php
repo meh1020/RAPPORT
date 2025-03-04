@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -150,7 +151,7 @@
             width: 30px;
         }
         .tsipika {
-            border-bottom: 1px solid black;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -174,7 +175,7 @@
     <div class="summary-container">
         <div class="summary-header">SOMMAIRE</div>
         <div class="summary-content">
-            <p><strong>1. EVENEMENTS SAR</strong></p>
+            <p><strong>1. EVENEMENTS SAR</strong></p><br>
             <p class="ml-5">1.1. TYPES D'INCIDENTS</p>
             <p class="ml-5">1.2. CAUSES DES INCIDENTS</p>
             <p class="ml-5">1.3. LOCALISATION DES INCIDENTS</p>
@@ -184,17 +185,17 @@
 
             <p><strong>3. SUIVI DU TRAFIC MARITIME DANS LA ZEE DE MADAGASCAR</strong></p><br>
             <p class="ml-5">3.1. SUIVI DES NAVIRES PARTICULIERS</p><br>
-            <p class="ml-5">3.2. SUIVI DES NAVIRES DANS LES MERS TERRITORIALES (PORTS INCLUS)</p>
+            <p class="ml-5">3.2. SUIVI DES NAVIRES DANS LES MERS TERRITORIALES (PORTS INCLUS)</p> <br>
             <p class="ml-6">3.2.1. DELIMITATION DES ZONES DE SURVEILLANCE</p>
             <p class="ml-6">3.2.2. LISTE DES NAVIRES PAR ZONE</p>
             <p class="ml-6">3.2.3. RECAPITULATIF SUIVI CABOTAGE NATIONAL</p>
             <p class="ml-6">3.2.4. RECAPITULATIF ARRIVEE NAVIRES ETRANGERS</p>
-            <p class="ml-6">3.2.5. RECAPITULATIF LISTE NAVIRES DE PASSAGE INOFFENSIF</p>
+            <p class="ml-6">3.2.5. RECAPITULATIF LISTE NAVIRES DE PASSAGE INOFFENSIF</p><br>
             <p class="ml-5">3.3. RECAPITULATION ZEE</p><br>
 
             <p><strong>4. RECAPITULATIF ACTIVITES VEDETTES SAR</strong></p>
             <p><strong>5. POLLUTION</strong></p>
-            <p><strong>6. AUTRES</strong></p>
+            <p><strong>6. AUTRES</strong></p><br><br>
         </div>
     </div>
     <div style="page-break-before: always;"></div>
@@ -327,7 +328,7 @@
       <div class="sar-section">
         <h2>2. AVIS AUX NAVIGATEURS</h2>
         @if(isset($avurnavs) && $avurnavs->count() > 0)
-            <p>{{ $avurnavs->count() }} avis aux navigateurs ont été lancés :</p>
+            <p>{{ $avurnavs->count() }} avis aux navigateurs {{ $avurnavs->count() > 1 ? "ont été lancés" : "a été lancé" }} :</p>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-striped">
                     <thead class="table-dark">
@@ -408,21 +409,84 @@
                     </table>
                 </div>
                 <div class="chart-desc">
-                    <p>Tableau 02 : Nombre des navires chaque la zone</p>
+                    <p>Tableau 02 : Nombre des navires chaque zone</p>
                 </div>
             </div>
         </div>
         @endif
-
-
     </div>
+
+
+    <div class="sar-section">
+        <h3>3.3 RECAPITULATION ZEE</h3>
+        @if(isset($shipTypesChartBase64) && isset($shipTypesData) && isset($topShipTypes) && isset($topShipTypesFlags))
+        <p>
+            @php $totalShipCount = 0; @endphp
+            @foreach($shipTypesData as $shipType)
+                @php $totalShipCount += $shipType['count']; @endphp
+            @endforeach
+            A titre de récapitulation, nous avons enregistré {{  $totalShipCount }} navires dans la ZEE de Madagascar durant {{ $filterResult }}. 
+            La figure 6 ci-après nous donnent un aperçu de ces navires par rapport aux types sans doublon :
+        </p>
+        <div class="chart-section">
+            <h4>Répartition par Ship Type</h4>
+            <div class="chart-image">
+                <img src="{{ $shipTypesChartBase64 }}" alt="Graphique Ship Type">
+            </div>
+            <div class="chart-desc">
+                <p>Figure 6 : Répartition des navires par type dans la ZEE.</p>
+            </div>
+        </div>
+            <p>
+                @if(count($topShipTypes) >= 3)
+                    Comme illustré par la figure 6, les navires du type « {{ $topShipTypes[0]['name'] }} » ({{ $topShipTypes[0]['count'] }} navires) sont les plus observés dans notre ZEE, 
+                    suivis par les types « {{ $topShipTypes[1]['name'] }} » ({{ $topShipTypes[1]['count'] }} navires) et « {{ $topShipTypes[2]['name'] }} » ({{ $topShipTypes[2]['count'] }} navires).
+                    <br> Si on fait une analyse par rapport au pavillon, on constate que : <br>
+                    - les navires battant pavillon {{ $topShipTypesFlags[0] }} sont les plus nombreux dans notre ZEE, suivis par les pavillons {{ $topShipTypesFlags[1] }} et {{ $topShipTypesFlags[2] }}.
+                    <br> La figure 7, ci-après, nous donne un aperçu de tous les pavillons des bateaux de pêche dans notre ZEE durant {{$filterResult}}.
+                @elseif(count($topShipTypes) == 2)
+                    Comme illustré par la figure 6, les navires du type « {{ $topShipTypes[0]['name'] }} » ({{ $topShipTypes[0]['count'] }} navires) sont les plus observés dans notre ZEE, 
+                    suivis par les types « {{ $topShipTypes[1]['name'] }} » ({{ $topShipTypes[1]['count'] }} navires) .
+                    <br> Si on fait une analyse par rapport au pavillon, on constate que : <br>
+                    - les navires battant pavillon {{ $topShipTypesFlags[0] }} sont les plus nombreux dans notre ZEE, suivis par les pavillons {{ $topShipTypesFlags[1] }}.
+                    <br> La figure 7, ci-après, nous donne un aperçu de tous les pavillons des bateaux de pêche dans notre ZEE durant {{$filterResult}}.
+                @elseif(count($topShipTypes) == 1)
+                    Comme illustré par la figure 6, les navires du type « {{ $topShipTypes[0]['name'] }} » ({{ $topShipTypes[0]['count'] }} navires) sont les plus observés dans notre ZEE, 
+                     .
+                    <br> Si on fait une analyse par rapport au pavillon, on constate que : <br>
+                    - les navires battant pavillon {{ $topShipTypesFlags[0] }} sont les plus nombreux dans notre ZEE.
+                @else
+                    Aucun navire n’a été trouvé dans la ZEE pour ce filtre.
+                    <br> La figure 7, ci-après, nous donne un aperçu de tous les pavillons des bateaux de pêche dans notre ZEE durant {{$filterResult}}.
+                @endif
+            </p> 
+        <br>
+        @endif
+
+            <!-- SECTION 6 : Répartition des navires par Flag -->
+        @if(isset($flagChartUrl) && isset($flagData))
+        <div class="chart-section">
+            <h4>FISHING</h4>
+            <div class="chart-image">
+                <img src="{{ $flagChartBase64 }}" alt="Graphique Flags">
+            </div>
+            <div class="chart-desc">
+                <p>Figure 7 : Tous les bateaux de pêche dans la ZEE</p>
+            </div>
+        </div>
+        @endif
+    </div>
+    
+    
+    
 
     <!-- SECTION 6 : POLLUTION -->
     <div class="sar-section">
-        <h2>6. POLLUTION</h2>
+        <h2>5. POLLUTION</h2>
         @if(isset($pollutions) && $pollutions->count() > 0)
+        <p>{{ $pollutions->count() }} pollution(s) enregistrée(s) durant {{ $filterResult }}</p>
             @foreach($pollutions as $pollution)
-                
+                <div style="margin-left: 30px">
                     <p><strong>Numero :</strong> {{ $pollution->numero }}</p>
                     <p><strong>Zone :</strong> {{ $pollution->zone }}</p>
                     <p><strong>Coordonnées :</strong> {{ $pollution->coordonnees }}</p>
@@ -437,12 +501,10 @@
                         <p><strong>Image Satellite :</strong></p>
                         <img src="{{ $satBase64 }}" width="500" class="rounded mb-2">
                         <br><br>
-                    @else
-                        <p></span></p>
                     @endif
-
                     @if($pollution->images->isNotEmpty())
                         <p><strong> Image(s) :</strong></p>
+                </div>
                         @foreach($pollution->images as $image)
                             <?php
                                 $imgPath = public_path('storage/' . $image->image_path);
@@ -454,7 +516,7 @@
                             <br><br>
                         @endforeach
                     @else
-                        <p><span class="text-muted">Aucune autre image</span></p>
+                        <p><span class="text-muted">Aucune image</span></p>
                     @endif
            
             @endforeach
@@ -462,23 +524,12 @@
             <p>Aucune donnée de pollution n'est disponible pour les filtres sélectionnés.</p>
         @endif
     </div>
-
-    <!-- SECTION 6 : Répartition des navires par Flag -->
-    @if(isset($flagChartUrl) && isset($flagData))
-    <div class="chart-section">
-        <h2>Répartition des navires par Flag</h2>
-        <div class="chart-image">
-            <img src="{{ $flagChartBase64 }}" alt="Graphique Flags">
-        </div>
-        <div class="chart-desc">
-            <p>Liste des flags et nombre de navires :</p>
-            <ul>
-                @foreach($flagData as $flag)
-                    <li>{{ $flag['name'] }} : {{ $flag['count'] }}</li>
-                @endforeach
-            </ul>
-        </div>
+    <div class="sar-section">
+        <h2>6. AUTRES</h2>
+        <p>RAS</p>
     </div>
-    @endif
+    
+    <h2 style="text-align: center">FIN DU RAPPORT</h2>
+
 </body>
 </html>

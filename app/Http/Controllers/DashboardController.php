@@ -10,6 +10,8 @@ use App\Models\Sitrep;
 use App\Models\BilanSar;
 use App\Models\Region;
 use App\Models\Peche;
+use App\Models\Cabotage;
+
 
 class DashboardController extends Controller
 {
@@ -71,40 +73,49 @@ class DashboardController extends Controller
         SUM(evasan) as evasan_total
     ')->first();
 
-    // 🔹 Comptage des entrées pour chaque zone (1 à 9)
-    $zoneCounts = [];
-    for ($i = 1; $i <= 9; $i++) {
-        $modelClass = "App\\Models\\zone_$i";
-        if (class_exists($modelClass)) {
-            $zoneCounts["Zone $i"] = $modelClass::count();
+        // 🔹 Comptage des entrées pour chaque zone (1 à 9)
+        $zoneCounts = [];
+        for ($i = 1; $i <= 9; $i++) {
+            $modelClass = "App\\Models\\zone_$i";
+            if (class_exists($modelClass)) {
+                $zoneCounts["Zone $i"] = $modelClass::count();
+            }
         }
-    }
 
-     // 🔹 **Ajout du comptage des flags des navires de pêche**
-     $flagData = Peche::selectRaw('flag, COUNT(*) as count')
-     ->groupBy('flag')
-     ->get()
-     ->map(function ($item) {
-         return [
-             'name' => $item->flag,
-             'count' => $item->count
-         ];
-     });
+        // 🔹 **Ajout du comptage des flags des navires de pêche**
+        $flagData = Peche::selectRaw('flag, COUNT(*) as count')
+        ->groupBy('flag')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'name' => $item->flag,
+                'count' => $item->count
+            ];
+        });
 
-    $shipTypesData = Article::selectRaw('ship_type, COUNT(*) as count')
-                         ->groupBy('ship_type')
-                         ->get()
-                         ->map(function ($item) {
-                            return [
-                                'name' => $item->ship_type,
-                                'count' => $item->count
-                            ];
-                        });
+        $shipTypesData = Article::selectRaw('ship_type, COUNT(*) as count')
+                            ->groupBy('ship_type')
+                            ->get()
+                            ->map(function ($item) {
+                                return [
+                                    'name' => $item->ship_type,
+                                    'count' => $item->count
+                                ];
+                            });
+        
+        $cabotageData = Cabotage::selectRaw('
+        provenance,
+        COUNT(DISTINCT navires) as total_navires,
+        SUM(equipage) as total_equipage,
+        SUM(passagers) as total_passagers
+    ')
+    ->groupBy('provenance')
+    ->get();
 
-    return view('dashboard', compact(
-        'articleCount', 'avurnavCount', 'pollutionCount', 'sitrepCount', 'bilanSarCount', 
-        'typesData', 'causesData', 'regionsData', 'bilanStats', 'zoneCounts', 'flagData','shipTypesData'
-    ));
+        return view('dashboard', compact(
+            'articleCount', 'avurnavCount', 'pollutionCount', 'sitrepCount', 'bilanSarCount', 
+            'typesData', 'causesData', 'regionsData', 'bilanStats', 'zoneCounts', 'flagData','shipTypesData','cabotageData'
+        ));
     }
 
     

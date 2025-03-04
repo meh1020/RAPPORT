@@ -91,3 +91,10 @@ Route::get('/rapport', [RapportController::class, 'index'])->name('rapport.index
 
 // Route pour exporter en PDF, on récupère les mêmes filtres
 Route::get('/rapport/pdf', [RapportController::class, 'exportPdf'])->name('rapport.exportPdf');
+
+//CABOTAGE
+use App\Http\Controllers\CabotageController;
+
+Route::resource('cabotage', CabotageController::class);
+Route::post('/cabotage/store', [CabotageController::class, 'store'])->name('cabotage.store');
+
