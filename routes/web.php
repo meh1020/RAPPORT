@@ -108,3 +108,14 @@ Route::resource('vedette_sar', VedetteSar::class);
 Route::post('/vedette_sar/store', [VedetteSar::class, 'store'])->name('vedette_sar.store');
 
 
+// PASSAGE INNOFENSIF
+use App\Http\Controllers\PassageInoffensifController;
+Route::resource('passage_inoffensifs', PassageInoffensifController::class)
+     ->only(['index', 'create', 'store', 'destroy']);
+
+
+// SUIVI DES NAVIRES PARTICULIERS
+use App\Http\Controllers\SuiviNavireParticulierController;
+
+Route::resource('suivi_navire_particuliers', SuiviNavireParticulierController::class)
+    ->only(['index', 'create', 'store', 'destroy']);

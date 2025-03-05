@@ -5,7 +5,7 @@
 @section('content')
 
     <div class="container-fluid px-4">
-        <h2 class="mb-4 text-center">📜 Liste des données</h2>
+        <h2 class="mb-4 text-center">📜 ZEE</h2>
 
         <div class="d-flex justify-content-between flex-wrap mb-3">
             <a href="{{ route('articles.export') }}" class="btn btn-success">

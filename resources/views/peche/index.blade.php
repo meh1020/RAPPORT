@@ -5,7 +5,7 @@
 @section('content')
 
     <div class="container-fluid px-4">
-        <h2 class="mb-4 text-center">📜 Pêche</h2>
+        <h2 class="mb-4 text-center">🎣 Pêche</h2>
 
         <!-- Formulaire d'import CSV -->
         <div class="card p-3 mb-4 shadow-sm">

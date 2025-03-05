@@ -37,7 +37,7 @@
         <a href="{{ route('peche.index') }}" class="nav-link {{ request()->is('peche') ? 'activo' : '' }}">Pêche</a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="{{ route('mer_territorial.index') }}" class="nav-link {{ request()->is('mer') ? 'activo' : '' }}">Mer territorial</a>
+        <a href="{{ route('mer_territorial.index') }}" class="nav-link {{ request()->is('mer_territorial') ? 'activo' : '' }}">Mer territorial</a>
       </li>
     </ul>
 
@@ -184,12 +184,28 @@
           </li>
             <li class="nav-item">
               <a href="{{ url('/vedette_sar') }}" class="nav-link {{ request()->is('vedette_sar*') ? 'activee' : '' }}">
-                <i class="fas fa-sailboat nav-icon"></i> 
+                <i class="fas fa-life-ring nav-icon"></i> 
                     <p>
                           VEDETTE SAR
                     </p>
               </a>
-          </li>
+              </li>
+              <li class="nav-item">
+                <a href="{{ route('passage_inoffensifs.index') }}" class="nav-link {{ request()->is('passage*') ? 'activee' : '' }}">
+                  <i class="fas fa-sailboat nav-icon"></i>
+                  <p>
+                      PASSAGE INOFENSIF 
+                  </p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('suivi_navire_particuliers.index') }}" class="nav-link {{ request()->is('suivi_navire*') ? 'activee' : '' }}">
+                  <i class="fas fa-ferry nav-icon"></i>
+                  <p>
+                    NAVIRE PARTICULIER
+                  </p>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{{ url('/rapports') }}" class="nav-link {{ request()->is('rapport*') ? 'activee' : '' }}">
                   <i class="fas fa-chart-bar nav-icon"></i> 

@@ -13,7 +13,7 @@
         </button>
     </div>
 
-    <h2 class="mb-4 text-center">🚢 Liste des Cabotages</h2>
+    <h2 class="mb-4 text-center">⚓ Liste des Cabotages</h2>
 
     @if(session('success'))
         <div class="alert alert-success">

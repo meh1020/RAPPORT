@@ -1,77 +1,91 @@
 @extends('general.top')
 
-@section('title', 'LISTE DES CABOTAGES')
+@section('title', 'LISTES')
 
 @section('content')
-<div class="container-fluid px-4">
-    <div class="top-menu mb-4 d-flex gap-2">
-        <button class="btn btn-success">
-            <a class="text-decoration-none text-white" href="{{ route('cabotage.create') }}">Créer VEDETTE SAR</a>
-        </button>
-        <button class="btn btn-secondary">
-            <a class="text-decoration-none text-white" href="{{ route('cabotage.index') }}">Liste VEDETTE SAR</a>
-        </button>
-    </div>
 
-    <h2 class="mb-4 text-center">🚢 Liste des VEDETTE SAR</h2>
+    <div class="container-fluid px-4">
+        <h2 class="mb-4 text-center">🌊 Mer territorial</h2>
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+        <!-- Formulaire d'import CSV -->
+        <div class="card p-3 mb-4 shadow-sm">
+            <form action="{{ route('mer_territorial.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="input-group">
+                    <input type="file" name="csv_file" class="form-control" required>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-upload"></i> Importer CSV</button>
+                </div>
+            </form>
         </div>
-    @endif
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>UNITE SAR</th>
-                    <th>TOTAL INTERVENTIONS</th>
-                    <th>TOTAL POB</th>
-                    <th>TOTAL SURVIVANTS</th>
-                    <th>TOTAL MORTS</th>
-                    <th>TOTAL DISPARUS</th>
-                    <th style="width: 150px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($cabotages as $cabotage)
+        <!-- TABLE RESPONSIVE -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-striped">
+                <thead class="table-dark">
                     <tr>
-                        <td><small>{{ $cabotage->id }}</small></td>
-                        <td><small>{{ $cabotage->unite_sar }}</small></td>
-                        <td><small>{{ $cabotage->total_interventions }}</small></td>
-                        <td><small>{{ $cabotage->total_pob }}</small></td>
-                        <td><small>{{ $cabotage->total_survivants }}</small></td>
-                        <td><small>{{ $cabotage->total_morts }}</small></td>
-                        <td><small>{{ $cabotage->total_disparus }}</small></td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <a href="{{ route('cabotage.edit', $cabotage->id) }}" class="btn btn-secondary btn-sm">Modifier</a>
-                                <form action="{{ route('cabotage.destroy', $cabotage->id) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer cet élément ?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+                        <th>ID</th>
+                        <th>Flag</th>
+                        <th>Vessel Name</th>
+                        <th>Registered Owner</th>
+                        <th>Call Sign</th>
+                        <th>MMSI</th>
+                        <th>IMO</th>
+                        <th>Ship Type</th>
+                        <th>Destination</th>
+                        <th>ETA</th>
+                        <th>Navigation Status</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Age</th>
+                        <th>Time Of Fix</th>
+                        <th style="width: 120px;">Actions</th> <!-- Agrandissement de la colonne -->
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center text-muted">Aucune donnée enregistrée.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
+                </thead>
+                <tbody>
+                    @foreach ($mers as $mer)
+                        <tr>
+                            <td><small>{{ $mer->id }}</small></td>
+                            <td><small>{{ $mer->flag }}</small></td>
+                            <td><small>{{ $mer->vessel_name }}</small></td>
+                            <td><small>{{ $mer->registered_owner }}</small></td>
+                            <td><small>{{ $mer->call_sign }}</small></td>
+                            <td><small>{{ $mer->mpechemsi }}</small></td>
+                            <td><small>{{ $mer->imo }}</small></td>
+                            <td><small>{{ $mer->ship_type }}</small></td>
+                            <td><small>{{ $mer->destination }}</small></td>
+                            <td><small>{{ $mer->eta }}</small></td>
+                            <td><small>{{ $mer->navigation_status }}</small></td>
+                            <td><small>{{ $mer->latitude }}</small></td>
+                            <td><small>{{ $mer->longitude }}</small></td>
+                            <td><small>{{ $mer->age }}</small></td>
+                            <td><small>{{ $mer->time_of_fix }}</small></td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <form action="{{ route('peche.destroy', $mer->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash-alt"></i>
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-<style>
-    .pagination {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-</style>
+        <div class="d-flex justify-content-center mt-3">
+            {{ $mers->links() }}
+        </div>
+
+    <style>
+        
+        .pagination {
+            flex-wrap: wrap; /* Empêche le débordement */
+            justify-content: center; /* Centre la pagination */
+        }
+    </style>
 @endsection

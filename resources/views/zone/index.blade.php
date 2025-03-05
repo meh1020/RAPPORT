@@ -5,7 +5,7 @@
 @section('content')
 
     <div class="container-fluid px-4">
-        <h2 class="mb-4 text-center">📜 Liste des données</h2>
+        <h2 class="mb-4 text-center">🚧 Zone</h2>
         <!-- Boutons pour accéder aux zones -->
         <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
             @for ($i = 1; $i <= 9; $i++)
