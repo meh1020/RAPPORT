@@ -10,6 +10,7 @@ use App\Models\Sitrep;
 use App\Models\BilanSar;
 use App\Models\Region;
 use App\Models\Peche;
+use App\Models\Vedette;
 use Illuminate\Support\Facades\Cache;
 use Barryvdh\DomPDF\Facade\Pdf; // Alias pour Barryvdh\DomPDF\Facade
 
@@ -736,6 +737,8 @@ class RapportController extends Controller
                 $filterResult = "Toutes les données";
             }
 
+            $vedettes = Vedette::all();
+
             return [
                 'filterResult'         => $filterResult,
                 'typesData'            => $typesData,
@@ -764,7 +767,8 @@ class RapportController extends Controller
                 'topShipTypes'         => $topShipTypes,
                 'topShipTypesFlags'    => $topShipTypesFlags,
                 'cabotageData'         => $cabotageData,
-                'cabotageBase64'       => $cabotageBase64
+                'cabotageBase64'       => $cabotageBase64,
+                'vedettes'             => $vedettes
             ];
         });
     

@@ -595,6 +595,46 @@
         </div>
         @endif
     </div>
+
+     {{-- SECTION : VEDETTE SAR --}}
+    <div class="sar-section">
+        <h2>4. RECAPITULATIF ACTIVITES VEDETTES SAR</h2>
+        <div class="chart-desc"> 
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>UNITE SAR</th>
+                            <th>TOTAL INTERVENTIONS</th>
+                            <th>TOTAL POB</th>
+                            <th>TOTAL SURVIVANTS</th>
+                            <th>TOTAL MORTS</th>
+                            <th>TOTAL DISPARUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($vedettes as $vedette)
+                            <tr>
+                                <!-- Ici, selon vos besoins, vous pouvez afficher "-" si l'ID ou l'UNITE SAR sont vides -->
+                                <td>{{ empty($vedette->id) ? '-' : $vedette->id }}</td>
+                                <td>{{ empty($vedette->unite_sar) ? '-' : $vedette->unite_sar }}</td>
+                                
+                                <!-- Pour TOTAL INTERVENTIONS : affiche "NEANT" lorsque vide -->
+                                <td>{{ empty($vedette->total_interventions) ? 'NEANT' : $vedette->total_interventions }}</td>
+                                
+                                <!-- Pour les autres colonnes, affiche "-" lorsqu'elles sont vides -->
+                                <td>{{ empty($vedette->total_pob) ? '-' : $vedette->total_pob }}</td>
+                                <td>{{ empty($vedette->total_survivants) ? '-' : $vedette->total_survivants }}</td>
+                                <td>{{ empty($vedette->total_morts) ? '-' : $vedette->total_morts }}</td>
+                                <td>{{ empty($vedette->total_disparus) ? '-' : $vedette->total_disparus }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            
+    </div>
     
     
     

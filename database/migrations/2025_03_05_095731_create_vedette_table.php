@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('vedette', function (Blueprint $table) {
             $table->id();
             $table->string('unite_sar'); // Unité SAR
-            $table->string('total_interventions'); // Nombre d'interventions
+            $table->string('total_interventions')->nullable(); // Nombre d'interventions
             $table->integer('total_pob')->nullable(); // Nombre total de personnes à bord
             $table->integer('total_survivants')->nullable(); // Nombre de survivants
             $table->integer('total_morts')->nullable(); // Nombre de morts
             $table->integer('total_disparus')->nullable(); // Nombre de disparus
             $table->timestamps();
+                    
         });
     }
 

@@ -31,7 +31,7 @@ class VedetteSar extends Controller
     {
         $validatedData = $request->validate([
             'unite_sar'          => 'required|string|max:255',
-            'total_interventions'=> 'required|string|max:255',
+            'total_interventions'=> 'nullable|integer|max:255',
             'total_pob'          => 'nullable|integer',
             'total_survivants'   => 'nullable|integer',
             'total_morts'        => 'nullable|integer',

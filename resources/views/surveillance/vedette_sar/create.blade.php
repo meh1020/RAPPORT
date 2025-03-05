@@ -31,7 +31,7 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="unite_sar" class="form-label">UNITE SAR :</label>
-                <input type="number" name="unite_sar" id="unite_sar" class="form-control">
+                <input type="text" name="unite_sar" id="unite_sar" class="form-control">
             </div>
             <div class="col-md-6">
                 <label for="total_interventions" class="form-label">TOTAL INTERVENTIONS :</label>
