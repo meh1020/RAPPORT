@@ -594,6 +594,76 @@ class RapportController extends Controller
                     ]
                 ]
             ];
+
+            $cabotageQuery = \App\Models\Cabotage::query();
+            // Filtrage par date (jour, trimestre, mois) sur created_at (ou 'date' si vous avez un champ 'date')
+            if ($dateFilter) {
+                $cabotageQuery->whereDate('created_at', $dateFilter);
+            } elseif (isset($start, $end)) {
+                $cabotageQuery->whereBetween('created_at', [$start, $end]);
+            } elseif ($yearMonth && $month) {
+                $cabotageQuery->whereYear('created_at', $yearMonth)
+                            ->whereMonth('created_at', $month);
+            }
+    
+            // Pour chaque provenance, on compte le nombre de navires distincts et on somme équipage & passagers
+            $cabotageData = $cabotageQuery
+                ->selectRaw('
+                    provenance,
+                    COUNT(DISTINCT navires) as total_navires,
+                    SUM(equipage) as total_equipage,
+                    SUM(passagers) as total_passagers
+                ')
+                ->groupBy('provenance')
+                ->get();
+             // Préparation des données pour le graphique
+            $labels = $cabotageData->pluck('provenance')->toArray();
+            $totalNavires   = $cabotageData->pluck('total_navires')->toArray();
+            $totalEquipage  = $cabotageData->pluck('total_equipage')->toArray();
+            $totalPassagers = $cabotageData->pluck('total_passagers')->toArray();
+
+            // Construction de la configuration du graphique (ici un graphique en barres)
+            $cabotageChartConfig= [
+                "type" => "bar",
+                "data" => [
+                    "labels" => $labels,
+                    "datasets" => [
+                        [
+                            "label"           => "Total Navires",
+                            "data"            => $totalNavires,
+                            "backgroundColor" => "rgba(75, 192, 192, 0.2)",
+                            "borderColor"     => "rgba(75, 192, 192, 1)",
+                            "borderWidth"     => 1,
+                        ],
+                        [
+                            "label"           => "Total Equipage",
+                            "data"            => $totalEquipage,
+                            "backgroundColor" => "rgba(192, 75, 192, 0.2)",
+                            "borderColor"     => "rgba(192, 75, 192, 1)",
+                            "borderWidth"     => 1,
+                        ],
+                        [
+                            "label"           => "Total Passagers",
+                            "data"            => $totalPassagers,
+                            "backgroundColor" => "rgba(192, 192, 75, 0.2)",
+                            "borderColor"     => "rgba(192, 192, 75, 1)",
+                            "borderWidth"     => 1,
+                        ],
+                    ]
+                ],
+                "options" => [
+                    "scales" => [
+                        "yAxes" => [
+                            [
+                                "ticks" => [
+                                    "beginAtZero" => true,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        
     
             // Construction des URLs pour chaque graphique
             $typesChartUrl     = 'https://quickchart.io/chart?width=500&height=200&version=3&c=' . urlencode(json_encode($typesChartConfig));
@@ -603,6 +673,7 @@ class RapportController extends Controller
             $zoneChartUrl      = 'https://quickchart.io/chart?width=450&height=200&version=3&c=' . urlencode(json_encode($zoneChartConfig));
             $flagChartUrl      = 'https://quickchart.io/chart?width=450&height=200&version=3&c=' . urlencode(json_encode($flagChartConfig));
             $shipTypesChartUrl = 'https://quickchart.io/chart?width=500&height=300&version=3&c=' . urlencode(json_encode($shipTypesChartConfig));
+            $cabotadeChartUrl =  'https://quickchart.io/chart?width=500&height=300&version=3&c=' . urlencode(json_encode($cabotageChartConfig));
     
             // Appels HTTP asynchrones pour récupérer les images de graphiques
             $client = new \GuzzleHttp\Client(['verify' => false]);
@@ -614,6 +685,7 @@ class RapportController extends Controller
                 'zoneChartImage'      => $client->getAsync($zoneChartUrl),
                 'flagChartImage'      => $client->getAsync($flagChartUrl),
                 'shipTypesChartImage' => $client->getAsync($shipTypesChartUrl),
+                'cabotageChartImage'  => $client->getAsync($cabotadeChartUrl)
             ];
             // Utilisation de Utils::unwrap() pour résoudre les promesses
             $results = \GuzzleHttp\Promise\Utils::unwrap($promises);
@@ -626,6 +698,7 @@ class RapportController extends Controller
             $zoneChartBase64      = 'data:image/png;base64,' . base64_encode($results['zoneChartImage']->getBody()->getContents());
             $flagChartBase64      = 'data:image/png;base64,' . base64_encode($results['flagChartImage']->getBody()->getContents());
             $shipTypesChartBase64 = 'data:image/png;base64,' . base64_encode($results['shipTypesChartImage']->getBody()->getContents());
+            $cabotageBase64       = 'data:image/png;base64,' . base64_encode($results['cabotageChartImage']->getBody()->getContents());
     
             // Récupération des données pour Avurnav et Pollution
             $avurnavQuery = \App\Models\Avurnav::query();
@@ -662,7 +735,7 @@ class RapportController extends Controller
             } else {
                 $filterResult = "Toutes les données";
             }
-    
+
             return [
                 'filterResult'         => $filterResult,
                 'typesData'            => $typesData,
@@ -690,7 +763,8 @@ class RapportController extends Controller
                 'shipTypesChartBase64' => $shipTypesChartBase64,
                 'topShipTypes'         => $topShipTypes,
                 'topShipTypesFlags'    => $topShipTypesFlags,
-                'cabotageData'         => $cabotageData
+                'cabotageData'         => $cabotageData,
+                'cabotageBase64'       => $cabotageBase64
             ];
         });
     

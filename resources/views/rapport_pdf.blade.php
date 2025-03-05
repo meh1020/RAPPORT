@@ -389,6 +389,124 @@
             <div class="chart-image">
                 <img src="{{ $zoneChartBase64 }}" alt="Graphique Zones">
             </div>
+            <div class="chart-desc">      
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                @foreach($zoneCounts as $zoneName => $count)
+                                    <th>{{ $zoneName }}</th>
+                                @endforeach
+                            </tr>
+                            <tr style="color: darkblue; background-color: white;">
+                                @foreach($zoneCounts as $zoneName => $count)
+                                    <th> {{ $count }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+
+                    </table>
+                </div>
+                <div class="chart-desc">
+                    <p>Tableau 02 : Nombre des navires chaque zone</p>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+
+     <!-- CABOTAGE -->
+     <div class="sar-section">
+        <h4 style="margin-left: 35px" class="tsipika">3.2.3 RECAPITULATIF SUIVI CABOTAGE</h4>
+        <div class="chart-desc"> 
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>PORTS</th>
+                            <th>TOTAL DES MOUVEMENTS (APPAREILLAGE ET ACCOSTAGE)</th>
+                            <th>TOTAL ÉQUIPAGE</th>
+                            <th>TOTAL PASSAGERS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $sumNavires   = 0;
+                            $sumEquipage  = 0;
+                            $sumPassagers = 0;
+                        @endphp
+            
+                        @foreach($cabotageData as $cabotage)
+                            <tr>
+                                <td>{{ $cabotage->provenance }}</td>
+                                <td>{{ $cabotage->total_navires }}</td>
+                                <td>{{ $cabotage->total_equipage }}</td>
+                                <td>{{ $cabotage->total_passagers }}</td>
+                            </tr>
+            
+                            @php
+                                $sumNavires   += $cabotage->total_navires;
+                                $sumEquipage  += $cabotage->total_equipage;
+                                $sumPassagers += $cabotage->total_passagers;
+                            @endphp
+                        @endforeach
+            
+                        <!-- Ligne de TOTAL en bas du tableau -->
+                        <tr style="background-color: #00BFF3; font-weight: bold;">
+                            <td>TOTAL</td>
+                            <td>{{ $sumNavires }}</td>
+                            <td>{{ $sumEquipage }}</td>
+                            <td>{{ $sumPassagers }}</td>
+                        </tr>
+                    </tbody>
+                </table>               
+                </div>
+                <div class="chart-desc">
+                    <p>Tableau 11 : Récapitulatif suivi cabotage</p>
+                </div>
+            </div>
+            <div class="chart-image">
+                <img src="{{ $cabotageBase64 }}" alt="Graphique Zones">
+            </div>
+            <div>
+                
+                <p>
+                    @php
+                    // Récupération des noms de ports (provenance) et concaténation séparée par " - "
+                    $ports = $cabotageData->pluck('provenance')->unique()->implode(' - '); // Exemple : "ANTALAHA - FORT DAUPHIN"
+                    @endphp     
+                    A titre récapitulatif, ({{ $sumNavires}}) navires de cabotage nationaux ont été enregistrés pour le trimestre {{ $filterResult }} dont : ({{ $ports }}), suivant les e-mails de mouvement des navires reçus.
+                </p>
+            </div>
+    </div>
+
+    {{-- ZEE --}}
+    <div class="sar-section">
+        <h2>3. SUIVI DU TRAFIC MARITIME DANS LA ZEE DE MADAGASCAR</h2>
+        <h3>3.1	SUIVI DES NAVIRES PARTICULIERS :</h3>
+        ?????????????
+        <h3>3.2 SUIVI DES NAVIRES DANS LES MERS TERRITORIALES</h3>
+        <h4 style="margin-left: 35px" class="tsipika">3.2.1 DELIMITATION DES ZONES DE SURVEILLANCE</h4>
+
+        <?php
+            // Encodage de l'image zone en Base64
+            $path = public_path('images/zone.png');
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        ?>
+        <!-- Page de couverture -->
+        <div style="text-align: center;">
+            <img src="{{ $base64 }}" alt="zones" style="width: 320px;">
+            <br>
+        </div>
+
+        <h4 style="margin-left: 35px" class="tsipika">3.2.2 NOMBRES DES NAVIRES PAR ZONES</h4><br>
+        @if(isset($zoneChartUrl) && isset($zoneCounts))
+        <div class="chart-section">
+            <div class="chart-image">
+                <img src="{{ $zoneChartBase64 }}" alt="Graphique Zones">
+            </div>
             <div class="chart-desc">
                 
                 <div class="table-responsive">
@@ -415,6 +533,7 @@
         </div>
         @endif
     </div>
+
 
 
     <div class="sar-section">
