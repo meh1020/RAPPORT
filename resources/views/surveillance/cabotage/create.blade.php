@@ -51,8 +51,8 @@
             </div>
         </div>
         <div class="row mb-3">
-            <!-- PASSAGERS -->
-            <div class="col-md-6">
+            <!-- PASSAGERS en champ complet -->
+            <div class="col-md-12">
                 <label for="passagers" class="form-label">PASSAGERS :</label>
                 <input type="number" name="passagers" id="passagers" class="form-control">
             </div>

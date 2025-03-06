@@ -27,45 +27,49 @@
     <form action="{{ url('/vedette_sar/store') }}" method="POST">
         @csrf
         
-        {{-- UNITE SAR et TOTAL INTERVENTIONS --}}
+            <!-- Ligne pour la date (champ complet) -->
         <div class="row mb-3">
-            <div class="col-md-4">
-                <label for="date" class="form-label">DATE :</label>
-                <input type="date" name="date" id="date" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <label for="unite_sar" class="form-label">UNITE SAR :</label>
-                <input type="text" name="unite_sar" id="unite_sar" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <label for="total_interventions" class="form-label">TOTAL INTERVENTIONS :</label>
-                <input type="number" name="total_interventions" id="total_interventions" class="form-control">
+            <div class="col-md-12">
+            <label for="date" class="form-label">DATE :</label>
+            <input type="date" name="date" id="date" class="form-control">
             </div>
         </div>
-
-        <!-- Deuxième ligne : TOTAL POB et TOTAL SURVIVANTS -->
+        
+        <!-- Ligne pour UNITE SAR et TOTAL INTERVENTIONS côte à côte -->
         <div class="row mb-3">
             <div class="col-md-6">
-                <label for="total_pob" class="form-label">TOTAL POB :</label>
-                <input type="number" name="total_pob" id="total_pob" class="form-control">
+            <label for="unite_sar" class="form-label">UNITE SAR :</label>
+            <input type="text" name="unite_sar" id="unite_sar" class="form-control">
             </div>
             <div class="col-md-6">
-                <label for="total_survivants" class="form-label">TOTAL SURVIVANTS :</label>
-                <input type="number" name="total_survivants" id="total_survivants" class="form-control">
+            <label for="total_interventions" class="form-label">TOTAL INTERVENTIONS :</label>
+            <input type="number" name="total_interventions" id="total_interventions" class="form-control">
             </div>
         </div>
-
-        <!-- Troisième ligne : TOTAL MORTS et TOTAL DISPARUS -->
+        
+        <!-- Les autres lignes restent inchangées -->
         <div class="row mb-3">
             <div class="col-md-6">
-                <label for="total_morts" class="form-label">TOTAL MORTS :</label>
-                <input type="number" name="total_morts" id="total_morts" class="form-control">
+            <label for="total_pob" class="form-label">TOTAL POB :</label>
+            <input type="number" name="total_pob" id="total_pob" class="form-control">
             </div>
             <div class="col-md-6">
-                <label for="total_disparus" class="form-label">TOTAL DISPARUS :</label>
-                <input type="number" name="total_disparus" id="total_disparus" class="form-control">
+            <label for="total_survivants" class="form-label">TOTAL SURVIVANTS :</label>
+            <input type="number" name="total_survivants" id="total_survivants" class="form-control">
             </div>
         </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+            <label for="total_morts" class="form-label">TOTAL MORTS :</label>
+            <input type="number" name="total_morts" id="total_morts" class="form-control">
+            </div>
+            <div class="col-md-6">
+            <label for="total_disparus" class="form-label">TOTAL DISPARUS :</label>
+            <input type="number" name="total_disparus" id="total_disparus" class="form-control">
+            </div>
+        </div>
+        
 
         <button type="submit" class="btn btn-primary">Soumettre</button>
     </form>

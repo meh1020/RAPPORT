@@ -30,6 +30,12 @@
         @csrf
         <div class="row">
         <div class="row">
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label class="form-label">Date</label>
+                    <input type="date" name="date" class="form-control" required>
+                </div>
+            </div>
             @foreach(['sitrep_sar', 'mrcc_madagascar', 'event', 'position', 'situation', 'number_of_persons', 'assistance_required', 'coordinating_rcc', 'initial_action_taken', 'chronology', 'additional_information'] as $index => $field)
                 @if($field === 'additional_information')
                     </div> <!-- Ferme la dernière ligne existante -->
@@ -53,8 +59,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Enregistrer</button>
     </div>
-
-        
+   
     </form>
 </div>
 @endsection

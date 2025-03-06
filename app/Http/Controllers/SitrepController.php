@@ -23,6 +23,7 @@ class SitrepController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'date' => 'date',
             'sitrep_sar' => 'required|string',
             'mrcc_madagascar' => 'required|string',
             'event' => 'required|string',
