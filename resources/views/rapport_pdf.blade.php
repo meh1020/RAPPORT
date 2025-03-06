@@ -480,6 +480,37 @@
             </div>
     </div>
 
+     {{-- PASSAGE INOFENSIF --}}
+     <div class="sar-section">
+        <h4 style="margin-left: 35px" class="tsipika">3.2.5 RECAPIULATIF LISTE NAVIRES DE PASSAGE INOFFENSIF</h4><br>
+        @if(isset($passageInoffensifs) && $passageInoffensifs->count() > 0)
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date d'entrée</th>
+                            <th>Date de sortie</th>
+                            <th>Navire</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($passageInoffensifs as $passage)
+                            <tr>
+                                <td>{{ $passage->date_entree }}</td>
+                                <td>{{ $passage->date_sortie }}</td>
+                                <td>{{ $passage->navire }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <p>RAS</p>
+        @endif
+    </div>
+    
+    </div>
+
     {{-- ZEE --}}
     <div class="sar-section">
         <h2>3. SUIVI DU TRAFIC MARITIME DANS LA ZEE DE MADAGASCAR</h2>

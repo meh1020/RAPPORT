@@ -22,6 +22,7 @@
         <table class="table table-bordered table-hover table-striped">
             <thead class="table-dark">
                 <tr>
+                    <th>Date</th>
                     <th>N°</th>
                     <th>Zone</th>
                     <th>Coordonnées</th>
@@ -33,6 +34,7 @@
             <tbody>
                 @forelse ($pollutions as $pollution)
                 <tr>
+                    <td><small>{{ $pollution->date }}</small></td>
                     <td><small>{{ $pollution->numero }}</small></td>
                     <td><small>{{ $pollution->zone }}</small></td>
                     <td><small>{{ $pollution->coordonnees }}</small></td>

@@ -23,6 +23,7 @@ class PollutionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'date' => 'required|date',
             'numero' => 'required|string',
             'zone' => 'required|string',
             'coordonnees' => 'required|string',
@@ -30,7 +31,7 @@ class PollutionController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
     
-        $pollution = Pollution::create($request->only(['numero', 'zone', 'coordonnees', 'type_pollution']));
+        $pollution = Pollution::create($request->only(['date','numero', 'zone', 'coordonnees', 'type_pollution']));
     
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -56,6 +57,7 @@ class PollutionController extends Controller
     public function update(Request $request, Pollution $pollution)
     {
         $request->validate([
+            'date' => 'required|date',
             'numero' => 'required|string',
             'zone' => 'required|string',
             'coordonnees' => 'required|string',

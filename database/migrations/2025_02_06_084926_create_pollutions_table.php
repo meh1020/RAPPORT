@@ -13,6 +13,7 @@ return new class extends Migration
 {
     Schema::create('pollutions', function (Blueprint $table) {
         $table->id();
+        $table->date('date');
         $table->string('numero');
         $table->string('zone');
         $table->string('coordonnees');

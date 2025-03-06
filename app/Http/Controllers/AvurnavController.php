@@ -21,6 +21,7 @@ class AvurnavController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            'date' => 'required|date',
             'avurnav_local' => 'required|string',
             'ile' => 'required|string',
             'vous_signale' => 'required|string',

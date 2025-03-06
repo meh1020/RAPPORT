@@ -12,6 +12,7 @@ class Vedette extends Model
     protected $table = 'vedette';
 
     protected $fillable = [
+        'date',
         'unite_sar',
         'total_interventions',
         'total_pob',

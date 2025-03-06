@@ -10,6 +10,7 @@ class Pollution extends Model
     use HasFactory;
 
     protected $fillable = [
+        'date',
         'numero',
         'zone',
         'coordonnees',

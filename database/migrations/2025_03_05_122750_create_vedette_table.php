@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('vedette', function (Blueprint $table) {
             $table->id();
+            $table->date('date');
             $table->string('unite_sar'); // Unité SAR
             $table->string('total_interventions')->nullable(); // Nombre d'interventions
             $table->integer('total_pob')->nullable(); // Nombre total de personnes à bord

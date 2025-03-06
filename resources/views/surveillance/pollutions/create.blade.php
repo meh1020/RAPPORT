@@ -26,6 +26,10 @@
     <form action="{{ route('pollutions.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="mb-3">
+            <label for="date" class="form-label">Date :</label>
+            <input type="date" id="date" name="date" value="{{ old('date') }}" class="form-control forma" required>
+        </div>
+        <div class="mb-3">
             <label for="numero" class="form-label">Numéro :</label>
             <input type="text" id="numero" name="numero" value="{{ old('numero') }}" class="form-control forma" required>
         </div>

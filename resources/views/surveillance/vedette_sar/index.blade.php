@@ -26,6 +26,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
+                    <th>DATE</th>
                     <th>UNITE SAR</th>
                     <th>TOTAL INTERVENTIONS</th>
                     <th>TOTAL POB</th>
@@ -39,6 +40,7 @@
                 @forelse ($vedettes as $vedette)
                     <tr>
                         <td><small>{{ $vedette->id }}</small></td>
+                        <td><small>{{ $vedette->date }}</small></td>
                         <td><small>{{ $vedette->unite_sar }}</small></td>
                         <td><small>{{ $vedette->total_interventions }}</small></td>
                         <td><small>{{ $vedette->total_pob }}</small></td>

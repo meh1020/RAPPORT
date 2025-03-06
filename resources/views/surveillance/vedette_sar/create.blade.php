@@ -29,17 +29,21 @@
         
         {{-- UNITE SAR et TOTAL INTERVENTIONS --}}
         <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <label for="date" class="form-label">DATE :</label>
+                <input type="date" name="date" id="date" class="form-control">
+            </div>
+            <div class="col-md-4">
                 <label for="unite_sar" class="form-label">UNITE SAR :</label>
                 <input type="text" name="unite_sar" id="unite_sar" class="form-control">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="total_interventions" class="form-label">TOTAL INTERVENTIONS :</label>
                 <input type="number" name="total_interventions" id="total_interventions" class="form-control">
             </div>
         </div>
 
-        {{-- TOTAL POB et TOTAL SURVIVANTS --}}
+        <!-- Deuxième ligne : TOTAL POB et TOTAL SURVIVANTS -->
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="total_pob" class="form-label">TOTAL POB :</label>
@@ -51,7 +55,7 @@
             </div>
         </div>
 
-        {{-- TOTAL MORTS et TOTAL DISPARUS --}}
+        <!-- Troisième ligne : TOTAL MORTS et TOTAL DISPARUS -->
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="total_morts" class="form-label">TOTAL MORTS :</label>

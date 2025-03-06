@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('avurnavs', function (Blueprint $table) {
             $table->id();
+            $table->date('date');
             $table->string('avurnav_local');
             $table->string('ile');
             $table->string('vous_signale');

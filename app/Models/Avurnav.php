@@ -10,6 +10,7 @@ class Avurnav extends Model
     use HasFactory;
 
     protected $fillable = [
+        'date',
         'avurnav_local',
         'ile',
         'vous_signale',

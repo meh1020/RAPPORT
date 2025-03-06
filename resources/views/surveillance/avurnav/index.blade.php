@@ -24,6 +24,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
+                    <th>Date</th>
                     <th>AVURNAV Local</th>
                     <th>Île</th>
                     <th>Vous signale</th>
@@ -42,6 +43,7 @@
                 @forelse($avurnavs as $avurnav)
                     <tr>
                         <td><small>{{ $avurnav->id }}</small></td>
+                        <td><small>{{ $avurnav->date }}</small></td>
                         <td><small>{{ $avurnav->avurnav_local }}</small></td>
                         <td><small>{{ $avurnav->ile }}</small></td>
                         <td><small>{{ $avurnav->vous_signale }}</small></td>

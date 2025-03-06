@@ -195,15 +195,30 @@ class RapportController extends Controller
             //  AJOUT : Filtrage Cabotage
         // --------------------------------------------
         $cabotageQuery = \App\Models\Cabotage::query();
+        // Filtrage par date (jour, trimestre, mois) sur la colonne 'date'
+        if ($dateFilter) {
+            $cabotageQuery->whereDate('date', $dateFilter);
+        } elseif (isset($start, $end)) {
+            $cabotageQuery->whereBetween('date', [$start, $end]);
+        } elseif ($yearMonth && $month) {
+            $cabotageQuery->whereYear('date', $yearMonth)
+                        ->whereMonth('date', $month);
+        }
+
+        
+
+           //  AJOUT : Filtrage Vedette sar
+        // --------------------------------------------
+        $VedetteQuery = \App\Models\Vedette::query();
 
         // Filtrage par date (jour, trimestre, mois) sur created_at (ou 'date' si vous avez un champ 'date')
         if ($dateFilter) {
-            $cabotageQuery->whereDate('created_at', $dateFilter);
+            $VedetteQuery->whereDate('date', $dateFilter);
         } elseif (isset($start, $end)) {
-            $cabotageQuery->whereBetween('created_at', [$start, $end]);
+            $VedetteQuery->whereBetween('date', [$start, $end]);
         } elseif ($yearMonth && $month) {
-            $cabotageQuery->whereYear('created_at', $yearMonth)
-                        ->whereMonth('created_at', $month);
+            $VedetteQuery->whereYear('date', $yearMonth)
+                        ->whereMonth('date', $month);
         }
 
         // Pour chaque provenance, on compte le nombre de navires distincts et on somme équipage & passagers
@@ -599,12 +614,12 @@ class RapportController extends Controller
             $cabotageQuery = \App\Models\Cabotage::query();
             // Filtrage par date (jour, trimestre, mois) sur created_at (ou 'date' si vous avez un champ 'date')
             if ($dateFilter) {
-                $cabotageQuery->whereDate('created_at', $dateFilter);
+                $cabotageQuery->whereDate('date', $dateFilter);
             } elseif (isset($start, $end)) {
-                $cabotageQuery->whereBetween('created_at', [$start, $end]);
+                $cabotageQuery->whereBetween('date', [$start, $end]);
             } elseif ($yearMonth && $month) {
-                $cabotageQuery->whereYear('created_at', $yearMonth)
-                            ->whereMonth('created_at', $month);
+                $cabotageQuery->whereYear('date', $yearMonth)
+                            ->whereMonth('date', $month);
             }
     
             // Pour chaque provenance, on compte le nombre de navires distincts et on somme équipage & passagers
@@ -664,6 +679,21 @@ class RapportController extends Controller
                     ],
                 ],
             ];
+
+            //Filtrage Vedette sar
+            $VedetteQuery = \App\Models\Vedette::query();
+
+            // Filtrage par date (jour, trimestre, mois) sur created_at (ou 'date' si vous avez un champ 'date')
+            if ($dateFilter) {
+                $VedetteQuery->whereDate('date', $dateFilter);
+            } elseif (isset($start, $end)) {
+                $VedetteQuery->whereBetween('date', [$start, $end]);
+            } elseif ($yearMonth && $month) {
+                $VedetteQuery->whereYear('date', $yearMonth)
+                            ->whereMonth('date', $month);
+            }
+            $Vedettes = $VedetteQuery->get();
+    
         
     
             // Construction des URLs pour chaque graphique
@@ -705,16 +735,16 @@ class RapportController extends Controller
             $avurnavQuery = \App\Models\Avurnav::query();
             $pollutionQuery = \App\Models\Pollution::query();
             if ($dateFilter) {
-                $avurnavQuery->whereDate('created_at', $dateFilter);
-                $pollutionQuery->whereDate('created_at', $dateFilter);
+                $avurnavQuery->whereDate('date', $dateFilter);
+                $pollutionQuery->whereDate('date', $dateFilter);
             } elseif ($yearQuarter && $quarter && isset($start, $end)) {
-                $avurnavQuery->whereBetween('created_at', [$start, $end]);
-                $pollutionQuery->whereBetween('created_at', [$start, $end]);
+                $avurnavQuery->whereBetween('date', [$start, $end]);
+                $pollutionQuery->whereBetween('date', [$start, $end]);
             } elseif ($yearMonth && $month) {
-                $avurnavQuery->whereYear('created_at', $yearMonth)
-                             ->whereMonth('created_at', $month);
-                $pollutionQuery->whereYear('created_at', $yearMonth)
-                               ->whereMonth('created_at', $month);
+                $avurnavQuery->whereYear('date', $yearMonth)
+                             ->whereMonth('date', $month);
+                $pollutionQuery->whereYear('date', $yearMonth)
+                               ->whereMonth('date', $month);
             }
             $avurnavs = $avurnavQuery->get();
             $pollutions = $pollutionQuery->get();
@@ -737,7 +767,20 @@ class RapportController extends Controller
                 $filterResult = "Toutes les données";
             }
 
-            $vedettes = Vedette::all();
+           
+
+             // Récupération des données pour PassageInoffensif
+             $passageInoffensifQuery = \App\Models\PassageInoffensif::query();
+             if ($dateFilter) {
+                 $passageInoffensifQuery->whereDate('date_entree', $dateFilter);
+             } elseif ($yearQuarter && $quarter && isset($start, $end)) {
+                 $passageInoffensifQuery->whereBetween('date_entree', [$start, $end]);
+             } elseif ($yearMonth && $month) {
+                 $passageInoffensifQuery->whereYear('date_entree', $yearMonth)
+                                     ->whereMonth('date_entree', $month);
+             }
+             $passageInoffensifs = $passageInoffensifQuery->get();
+
 
             return [
                 'filterResult'         => $filterResult,
@@ -768,7 +811,8 @@ class RapportController extends Controller
                 'topShipTypesFlags'    => $topShipTypesFlags,
                 'cabotageData'         => $cabotageData,
                 'cabotageBase64'       => $cabotageBase64,
-                'vedettes'             => $vedettes
+                'vedettes'             => $Vedettes,
+                'passageInoffensifs' => $passageInoffensifs,
             ];
         });
     

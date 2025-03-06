@@ -30,6 +30,7 @@ class VedetteSar extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            'date' => 'required|date',
             'unite_sar'          => 'required|string|max:255',
             'total_interventions'=> 'nullable|integer|max:255',
             'total_pob'          => 'nullable|integer',
