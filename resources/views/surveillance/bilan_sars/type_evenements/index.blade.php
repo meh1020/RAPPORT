@@ -19,11 +19,13 @@
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover table-striped">
-        <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Actions</th>
-        </tr>
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
         @foreach($types as $type)
         <tr>
             <td><small>{{ $type->id }}</small></td>

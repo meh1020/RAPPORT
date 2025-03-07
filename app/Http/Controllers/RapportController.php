@@ -693,6 +693,20 @@ class RapportController extends Controller
                             ->whereMonth('date', $month);
             }
             $Vedettes = $VedetteQuery->get();
+
+            //Filtrage Suivie navire particulier 
+            $nav_particulierQuery = \App\Models\SuiviNavireParticulier::query();
+
+            // Filtrage par date (jour, trimestre, mois) sur created_at (ou 'date' si vous avez un champ 'date')
+            if ($dateFilter) {
+                $nav_particulierQuery->whereDate('date', $dateFilter);
+            } elseif (isset($start, $end)) {
+                $nav_particulierQuery->whereBetween('date', [$start, $end]);
+            } elseif ($yearMonth && $month) {
+                $nav_particulierQuery->whereYear('date', $yearMonth)
+                            ->whereMonth('date', $month);
+            }
+            $nav_particuliers = $nav_particulierQuery->get();
     
         
     
@@ -812,7 +826,8 @@ class RapportController extends Controller
                 'cabotageData'         => $cabotageData,
                 'cabotageBase64'       => $cabotageBase64,
                 'vedettes'             => $Vedettes,
-                'passageInoffensifs' => $passageInoffensifs,
+                'passageInoffensifs'   =>   $passageInoffensifs,
+                'nav_particuliers'     => $nav_particuliers
             ];
         });
     
