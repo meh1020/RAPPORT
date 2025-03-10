@@ -119,3 +119,11 @@ use App\Http\Controllers\SuiviNavireParticulierController;
 
 Route::resource('suivi_navire_particuliers', SuiviNavireParticulierController::class)
     ->only(['index', 'create', 'store', 'destroy']);
+
+//Filtre destination mada 
+use App\Http\Controllers\DestinationController;
+Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
+Route::get('/destinations/create', [DestinationController::class, 'create'])->name('destinations.create');
+Route::post('/destinations', [DestinationController::class, 'store'])->name('destinations.store');
+Route::delete('/destinations/{destination}', [DestinationController::class, 'destroy'])
+    ->name('destinations.destroy');

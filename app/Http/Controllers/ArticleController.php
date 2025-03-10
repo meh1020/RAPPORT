@@ -96,45 +96,29 @@ class ArticleController extends Controller
     public function filter(Request $request)
     {
         $filter = $request->input('filter'); // Récupérer le filtre sélectionné
-        
         $query = Article::query(); // Initialisation de la requête
     
         if ($filter === 'destinationmada') {
-            // Liste des destinations pour "Destination Mada"
-            $filtreDestinations = [
-                "Mg die", "Antsiranana [mdg]", "Mg Die", "Mgdie", "Diego Suarez",
-                "Mg Dgo", "Mg Mjn", "Mgmjn", "Mg Mga", "Majunga", "Mahajanga",
-                "Mg Tle", "Mgtle", "Mg Ehl", "mgehl", "Mgt0a", "Mg Tmm", "Mgtoa",
-                "Mg Toa", "Tamatave", "Toamasina", "Tamatave-madagascar",
-                "Toamasina(tamatave)", "Mg.toamasina", "Mgtmm", "mgtmm", "Mgtmve",
-                "Tma", "Tma@@@@@@@@@@@@@@@@a", "Toamasina. Madagasca", "Nosy Be",
-                "Mgehl", "Mg Eho", "Mg Nbe", "Mg Voh", "Vohemar", "Mg Vhm", "Tular",
-                "Eez Madagascar", "Ile Sainte Marie", "Sainte Marie", "Iharana",
-                "Andoany", "Ehoala", "Tulear-Madagascar", "Tulear-mg", "Nosy Be",
-                "Ankify", "Mg Nos", "Mgnos", "Mg B2g", "Mg Ftu", "Hell-ville",
-                "Nosy Be Madagascar", "Nosy Iranja", "Mg Nbe", "Fort Dauphin",
-                "Antsiranana", "Mg Nosy Mangabe", "Nosy Tanikely", "Tulear__madagascar",
-                "Nosy Sakatia", "Mghlv", "Morondava", "Toamgt"
-            ];
+            // Récupérer toutes les destinations depuis la table
+            $filtreDestinations = \App\Models\Destination::pluck('name')->toArray();
     
-           // Appliquer le filtre
-        $query->where(function ($q) use ($filtreDestinations) {
-            foreach ($filtreDestinations as $destination) {
-                $q->orWhere('destination', $destination);
-            }
-            // Inclure aussi les destinations qui commencent par "Mg"
-            $q->orWhere('destination', 'LIKE', 'Mg%');
-        });
-
-        // Exclure les lignes avec shiptype = "Tug"
-        $query->where('ship_type', '!=', 'Tug');
-
-        // Exclure les lignes avec vessel_name = "TSARAVATSY", "AVISOA", "TS INDIAN OCEAN"
-        $query->whereNotIn('vessel_name', ['TSARAVATSY', 'AVISOA', 'TS INDIAN OCEAN']);
-
-        // Exclure les lignes avec flag = "Madagascar"
-        $query->where('flag', '!=', 'Madagascar');
-
+            // Appliquer le filtre sur les articles
+            $query->where(function ($q) use ($filtreDestinations) {
+                foreach ($filtreDestinations as $destination) {
+                    $q->orWhere('destination', $destination);
+                }
+                // Inclure aussi les destinations qui commencent par "Mg"
+                $q->orWhere('destination', 'LIKE', 'Mg%');
+            });
+    
+            // Exclure les lignes avec ship_type = "Tug"
+            $query->where('ship_type', '!=', 'Tug');
+    
+            // Exclure les lignes avec vessel_name = "TSARAVATSY", "AVISOA", "TS INDIAN OCEAN"
+            $query->whereNotIn('vessel_name', ['TSARAVATSY', 'AVISOA', 'TS INDIAN OCEAN']);
+    
+            // Exclure les lignes avec flag = "Madagascar"
+            $query->where('flag', '!=', 'Madagascar');
         } elseif ($filter === 'national') {
             // Filtrer uniquement les articles avec "Madagascar" et "Luxembourg"
             $query->whereIn('flag', ['Madagascar', 'Luxembourg']);
@@ -147,6 +131,7 @@ class ArticleController extends Controller
     
         return view('articles.index', compact('articles'));
     }
+    
     
 
     // Code corrigé pour les méthodes d'exportation CSV
@@ -202,22 +187,10 @@ class ArticleController extends Controller
         $query = Article::query();
     
         if ($filter === 'destinationmada') {
-            $filtreDestinations = [
-                "Mg die", "Antsiranana [mdg]", "Mg Die", "Mgdie", "Diego Suarez",
-                "Mg Dgo", "Mg Mjn", "Mgmjn", "Mg Mga", "Majunga", "Mahajanga",
-                "Mg Tle", "Mgtle", "Mg Ehl", "mgehl", "Mgt0a", "Mg Tmm", "Mgtoa",
-                "Mg Toa", "Tamatave", "Toamasina", "Tamatave-madagascar",
-                "Toamasina(tamatave)", "Mg.toamasina", "Mgtmm", "mgtmm", "Mgtmve",
-                "Tma", "Tma@@@@@@@@@@@@@@@@a", "Toamasina. Madagasca", "Nosy Be",
-                "Mgehl", "Mg Eho", "Mg Nbe", "Mg Voh", "Vohemar", "Mg Vhm", "Tular",
-                "Eez Madagascar", "Ile Sainte Marie", "Sainte Marie", "Iharana",
-                "Andoany", "Ehoala", "Tulear-Madagascar", "Tulear-mg", "Nosy Be",
-                "Ankify", "Mg Nos", "Mgnos", "Mg B2g", "Mg Ftu", "Hell-ville",
-                "Nosy Be Madagascar", "Nosy Iranja", "Mg Nbe", "Fort Dauphin",
-                "Antsiranana", "Mg Nosy Mangabe", "Nosy Tanikely", "Tulear__madagascar",
-                "Nosy Sakatia", "Mghlv", "Morondava", "Toamgt"
-            ];
+            // Récupérer toutes les destinations depuis la table
+            $filtreDestinations = \App\Models\Destination::pluck('name')->toArray();
     
+            // Appliquer le filtre sur les articles
             $query->where(function ($q) use ($filtreDestinations) {
                 foreach ($filtreDestinations as $destination) {
                     $q->orWhere('destination', $destination);

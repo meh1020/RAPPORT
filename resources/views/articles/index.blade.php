@@ -5,14 +5,14 @@
 @section('content')
 
     <div class="container-fluid px-4">
-        <h2 class="mb-4 text-center">📜 ZEE</h2>
+        <h2 class="mb-4 text-center">🐠 ZEE</h2>
 
         <div class="d-flex justify-content-between flex-wrap mb-3">
             <a href="{{ route('articles.export') }}" class="btn btn-success">
                 <i class="fas fa-file-csv"></i> Exporter tous les articles
             </a>
-            <a href="{{ route('list.mada') }}" class="btn btn-primary">
-                <i class="fas fa-file-csv"></i>Liste MADA
+            <a href="{{ route('destinations.create') }}" class="btn btn-primary">
+                <i class="fas fa-file-csv"></i> Ajout Destination
             </a>
         </div>
 
